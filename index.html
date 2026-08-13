@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Қаҳрамони ҳафта</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- Tailwind custom color configuration & animations -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            kidBlue: '#4cc9f0',
+            kidPurple: '#7209b7',
+            kidPink: '#f72585',
+            kidYellow: '#ffbe0b',
+            kidGreen: '#3a0ca3',
+            kidMint: '#06d6a0',
+          },
+          fontFamily: {
+            sans: ['Nunito', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          animation: {
+            'bounce-slow': 'bounce 2s infinite',
+            'pulse-slow': 'pulse 3s infinite',
+            'wiggle': 'wiggle 0.5s ease-in-out infinite',
+          },
+          keyframes: {
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Nunito Font for cute child-friendly appearance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* Custom floating background bubble styles */
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatUp 15s infinite linear;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    /* Custom scrollbar for Tajik kid theme */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-900 text-white min-h-screen font-sans relative overflow-x-hidden flex flex-col justify-between selection:bg-kidPink selection:text-white">
+
+  <!-- Background Bubbles -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0" id="bubble-container">
+    <!-- Generated dynamically in JS -->
+  </div>
+
+  <!-- Sound Status Indicator (Top Left) -->
+  <div class="fixed top-4 left-4 z-40 flex items-center gap-2">
+    <button onclick="toggleMute()" id="sound-btn" class="bg-white/10 hover:bg-white/20 active:scale-95 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all duration-300 shadow-lg text-xl" title="Хомӯш/Фаъол кардани овоз">
+      🔊
+    </button>
+  </div>
+
+  <!-- Discrete Teacher Lock (Top Right) -->
+  <div class="fixed top-4 right-4 z-40">
+    <button onclick="openLockModal()" class="bg-white/5 hover:bg-white/10 active:scale-95 text-white/40 hover:text-white p-3 rounded-full backdrop-blur-sm border border-white/10 transition-all duration-300 shadow-md text-sm" title="Панели муаллим">
+      🔒
+    </button>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-8 relative z-10 flex flex-col justify-center items-center">
+
+    <!-- Title Section -->
+    <header class="text-center mb-8 select-none">
+      <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm mb-4">
+        <span class="text-2xl">🏆</span>
+        <span class="text-kidYellow font-black uppercase tracking-wider text-sm sm:text-base">Давраи ҷорӣ: <span id="cycle-badge">1</span></span>
+      </div>
+      <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-kidBlue via-kidPink to-kidYellow drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tracking-wide">
+        Қаҳрамони ҳафта
+      </h1>
+      <p class="text-indigo-200 mt-3 text-lg md:text-xl font-bold">
+        Интихоби шавқовари навбатдори синф барои хонандагони синфи 1 🌟
+      </p>
+    </header>
+
+    <!-- VIEWS CONTAINER -->
+    <div class="w-full relative min-h-[450px] flex items-center justify-center">
+
+      <!-- ==================== VIEW 1: MAIN SCREEN ==================== -->
+      <div id="view-main" class="w-full max-w-4xl flex flex-col items-center gap-8 transition-all duration-500 transform opacity-100 scale-100">
+
+        <!-- Big Select Button -->
+        <div class="relative group mt-4">
+          <!-- Glow effect -->
+          <div class="absolute -inset-1 bg-gradient-to-r from-kidBlue via-kidPink to-kidYellow rounded-full blur-xl opacity-75 group-hover:opacity-100 group-hover:duration-200 animate-pulse duration-1000"></div>
+
+          <button onclick="startSelection()" class="relative px-12 py-8 bg-gradient-to-r from-kidPink to-kidYellow text-white font-black text-3xl md:text-4xl rounded-full border-4 border-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex flex-col items-center gap-2 select-none">
+            <span class="animate-bounce">🔮</span>
+            <span>Интихоб кардан</span>
+          </button>
+        </div>
+
+        <!-- Waiting Counter -->
+        <p id="waiting-count-text" class="text-indigo-200 font-bold text-lg text-center bg-white/5 px-6 py-2 rounded-full border border-white/5">
+          Хонандагони боқимонда дар ин давр: <span class="text-kidBlue text-2xl font-black" id="waiting-count">0</span>
+        </p>
+
+        <!-- Hall of Fame (Толори шӯҳрат) -->
+        <section class="w-full bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10 backdrop-blur-md shadow-2xl mt-4">
+          <h2 class="text-2xl md:text-3xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-kidYellow to-orange-400 mb-6 flex items-center justify-center gap-3">
+            👑 Толори шӯҳрат <span class="text-sm bg-kidYellow/10 text-kidYellow px-3 py-1 rounded-full border border-kidYellow/20">Навбатдорони фаъол</span>
+          </h2>
+
+          <!-- Empty State -->
+          <div id="hall-empty" class="text-center py-12 text-slate-400 flex flex-col items-center gap-3">
+            <span class="text-5xl animate-pulse">⭐</span>
+            <p class="font-bold text-lg">Ҳанӯз ягон қаҳрамон нест. Аввалин қаҳрамонро интихоб кунед!</p>
+          </div>
+
+          <!-- Hall Grid -->
+          <div id="hall-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 hidden">
+            <!-- Dynamic items go here -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ==================== VIEW 2: ROULETTE SCREEN ==================== -->
+      <div id="view-roulette" class="w-full max-w-xl bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col items-center text-center gap-8 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none absolute scale-95">
+
+        <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-kidBlue to-kidPink animate-pulse uppercase tracking-wider">
+          Чарх зада истодааст...
+        </h2>
+
+        <!-- Shuffler Visual -->
+        <div class="relative w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-tr from-indigo-500 via-pink-500 to-yellow-500 p-2 shadow-2xl flex items-center justify-center animate-spin-slow">
+          <div class="w-full h-full rounded-full bg-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            <!-- Central item display -->
+            <div id="roulette-avatar" class="text-8xl md:text-9xl mb-2 transition-all duration-100 transform scale-100">🐼</div>
+            <div id="roulette-name" class="text-2xl md:text-3xl font-black truncate max-w-full text-white tracking-wide">Интихоб...</div>
+          </div>
+          <!-- Outer Selector pointer indicator -->
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-4xl transform rotate-180 animate-bounce">▼</div>
+        </div>
+
+        <p class="text-indigo-200 font-bold text-lg">Бахтатонро месанҷем! Ки қаҳрамон мешавад? 🍀</p>
+      </div>
+
+      <!-- ==================== VIEW 3: HERO REVEAL SCREEN ==================== -->
+      <div id="view-reveal" class="w-full max-w-2xl bg-gradient-to-b from-indigo-950 via-slate-900 to-indigo-950 border-4 border-kidYellow/60 rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col items-center text-center gap-8 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none absolute scale-95 relative overflow-hidden">
+
+        <!-- Light rays behind card -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(253,224,71,0.15)_0,transparent_60%)] pointer-events-none"></div>
+
+        <!-- Celebration Header -->
+        <div class="relative z-10 select-none">
+          <span class="text-6xl md:text-7xl block animate-bounce-slow mb-2">🎉 Ғолиб! 🎉</span>
+          <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-kidYellow via-amber-300 to-orange-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.3)]">
+            Қаҳрамони ҳафта!
+          </h2>
+        </div>
+
+        <!-- Winner Huge Avatar Card -->
+        <div class="relative z-10 bg-white/10 border-2 border-white/20 p-8 rounded-2xl w-full max-w-md flex flex-col items-center gap-4 shadow-xl backdrop-blur-md">
+          <div id="winner-avatar" class="text-9xl animate-wiggle inline-block transform-gpu">🐨</div>
+          <h3 id="winner-name" class="text-3xl md:text-4xl font-black text-white tracking-wide">Сомонӣ</h3>
+        </div>
+
+        <!-- Predefined Secret Missions (Вазифаҳои махфӣ) -->
+        <div class="relative z-10 w-full max-w-md bg-slate-950/60 rounded-2xl p-6 border border-kidPink/30 text-left">
+          <h4 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-kidPink to-kidBlue mb-4 flex items-center gap-2">
+            🕵️‍♂️ Вазифаҳои махфӣ (Secret Missions):
+          </h4>
+          <ul id="winner-missions" class="space-y-3">
+            <!-- Dynamic missions inserted here -->
+          </ul>
+        </div>
+
+        <!-- Teacher Controls -->
+        <div class="relative z-10 flex flex-col sm:flex-row gap-4 w-full max-w-md">
+          <!-- Absent Button -->
+          <button onclick="handleAbsent()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 px-6 rounded-2xl border-b-4 border-rose-800 active:border-b-0 active:translate-y-1 transition-all duration-150 flex items-center justify-center gap-2 shadow-lg">
+            <span>🤒</span>
+            <span>Бемор / Дар дарс нест</span>
+          </button>
+
+          <!-- Accept Button -->
+          <button onclick="handleAccept()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-6 rounded-2xl border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all duration-150 flex items-center justify-center gap-2 shadow-lg text-lg">
+            <span>✅ Қабул кардан</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== TEACHER PANEL LOCK MODAL ==================== -->
+  <div id="lock-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-indigo-950 border-2 border-white/20 w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl mx-4 transform scale-95 transition-all duration-300" id="lock-modal-card">
+      <div class="text-5xl mb-3">🛡️</div>
+      <h3 class="text-2xl font-black mb-2">Муҳофизати кӯдакон</h3>
+      <p class="text-slate-300 mb-6 text-sm">Муаллими азиз, барои ворид шудан ба панел, масъалаи зеринро ҳал кунед:</p>
+
+      <!-- Quick Math Test -->
+      <div class="bg-slate-900/80 p-4 rounded-xl text-3xl font-black mb-6 border border-white/10 text-kidYellow">
+        <span id="math-num1">5</span> + <span id="math-num2">3</span> = ?
+      </div>
+
+      <input type="number" id="math-answer" placeholder="Ҷавобро ворид кунед" class="w-full text-center text-xl bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-kidPink font-bold text-white">
+
+      <div class="flex gap-3">
+        <button onclick="closeLockModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 font-bold py-3 rounded-xl transition-all">
+          Баргаштан
+        </button>
+        <button onclick="submitLockAnswer()" class="flex-1 bg-kidPink hover:bg-kidPink/90 font-black py-3 rounded-xl transition-all shadow-md">
+          Санҷидан ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TEACHER PANEL (PARED-DOWN FULL PANEL) ==================== -->
+  <div id="panel-teacher" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-slate-900 border border-white/10 w-full max-w-4xl h-full max-h-[90vh] rounded-3xl shadow-2xl mx-4 flex flex-col transform scale-95 transition-all duration-300 overflow-hidden" id="panel-card">
+
+      <!-- Panel Header -->
+      <div class="p-6 border-b border-white/10 flex justify-between items-center bg-indigo-950/50">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">🛠️</span>
+          <div>
+            <h2 class="text-2xl font-black text-white">Панели муаллим</h2>
+            <p class="text-xs text-indigo-200">Идоракунии хонандагон, омор ва даврҳои бозӣ</p>
+          </div>
+        </div>
+        <button onclick="closeTeacherPanel()" class="bg-white/5 hover:bg-white/10 text-white p-2 rounded-full transition-all">
+          ✕
+        </button>
+      </div>
+
+      <!-- Panel Body (Scrollable content) -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-8">
+
+        <!-- Statistics Section -->
+        <div>
+          <h3 class="text-lg font-bold text-indigo-300 mb-3 uppercase tracking-wider">📊 Омори умумӣ (Statistics)</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <span class="text-slate-400 text-xs font-bold block mb-1">Миқдори умумӣ</span>
+              <span class="text-2xl font-black text-white" id="stat-total">0</span> <span class="text-xs text-slate-400">нафар</span>
+            </div>
+            <div class="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20">
+              <span class="text-emerald-400 text-xs font-bold block mb-1">Қаҳрамон шуданд</span>
+              <span class="text-2xl font-black text-emerald-400" id="stat-monitored">0</span> <span class="text-xs text-emerald-400">нафар</span>
+            </div>
+            <div class="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20">
+              <span class="text-amber-400 text-xs font-bold block mb-1">Дар навбат ҳастанд</span>
+              <span class="text-2xl font-black text-amber-400" id="stat-waiting">0</span> <span class="text-xs text-amber-400">нафар</span>
+            </div>
+            <div class="bg-kidBlue/10 p-4 rounded-2xl border border-kidBlue/20">
+              <span class="text-kidBlue text-xs font-bold block mb-1">Давраи ҷорӣ</span>
+              <span class="text-2xl font-black text-kidBlue" id="stat-cycle">1</span> <span class="text-xs text-kidBlue">давр</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Student Form -->
+        <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+          <h3 class="text-lg font-bold text-indigo-300 mb-3">👤 Илова кардани хонандаи нав (Add Student)</h3>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+              <input type="text" id="new-student-name" placeholder="Ному насаби хонандаро ворид кунед" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-kidPink font-bold">
+            </div>
+            <!-- Custom Avatar/Emoji Preview -->
+            <div class="flex items-center gap-3">
+              <div class="bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 flex items-center gap-2">
+                <span class="text-xs text-slate-400">Аватар:</span>
+                <span id="selected-emoji-preview" class="text-2xl">🦊</span>
+                <button onclick="randomizePreviewEmoji()" class="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded">🎲</button>
+              </div>
+              <button onclick="addStudent()" class="bg-kidPink hover:bg-kidPink/95 active:scale-95 text-white font-black px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 whitespace-nowrap">
+                <span>➕</span>
+                <span>Илова кардан</span>
+              </button>
+            </div>
+          </div>
+          <p class="text-slate-400 text-xs mt-2">Агар аватарро иваз кардан хоҳед, тугмаи 🎲 (тасодуфӣ)-ро пахш намоед.</p>
+        </div>
+
+        <!-- Student List -->
+        <div>
+          <h3 class="text-lg font-bold text-indigo-300 mb-3 flex justify-between items-center">
+            <span>📋 Рӯйхати хонандагон (Student List)</span>
+            <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700" id="list-count">Умумӣ: 0</span>
+          </h3>
+          <div class="overflow-hidden border border-white/10 rounded-2xl bg-slate-950/40">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-indigo-950/30 text-indigo-300 font-bold text-sm border-b border-white/10">
+                  <th class="p-4 text-center w-16">Аватар</th>
+                  <th class="p-4">Ному насаб</th>
+                  <th class="p-4">Ҳолат (Status)</th>
+                  <th class="p-4 text-center">Бемориҳо (Absent Count)</th>
+                  <th class="p-4 text-center w-24">Амал</th>
+                </tr>
+              </thead>
+              <tbody id="student-table-body" class="divide-y divide-white/5">
+                <!-- Dynamically filled with students -->
+              </tbody>
+            </table>
+            <!-- Empty state for table -->
+            <div id="table-empty" class="text-center py-12 text-slate-500 hidden">
+              <span class="text-4xl block mb-2">🤷‍♂️</span>
+              <span>Ягон хонанда вуҷуд надорад. Лутфан илова кунед.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone Actions -->
+        <div class="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="text-center sm:text-left">
+            <h4 class="font-bold text-rose-400">Минтақаи хавфнок (Danger Zone)</h4>
+            <p class="text-slate-400 text-xs">Амалҳое, ки маълумотро ба пуррагӣ тағйир медиҳанд.</p>
+          </div>
+          <div class="flex gap-3 w-full sm:w-auto">
+            <button onclick="confirmResetCycle()" class="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl transition-all text-sm shadow">
+              🔄 Даврро аз нав оғоз кардан
+            </button>
+            <button onclick="confirmResetAll()" class="flex-1 sm:flex-initial bg-rose-700 hover:bg-rose-800 text-white font-bold px-4 py-2 rounded-xl transition-all text-sm shadow">
+              🗑️ Пурра тоза кардан
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Custom Alert Overlay -->
+  <div id="custom-alert" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-slate-900 border-2 border-kidYellow/40 max-w-md w-full rounded-2xl p-6 text-center shadow-2xl mx-4 transform scale-95 transition-all duration-300">
+      <span id="alert-icon" class="text-6xl block mb-3 animate-bounce">🔔</span>
+      <h3 id="alert-title" class="text-2xl font-black mb-2 text-white">Ура!</h3>
+      <p id="alert-message" class="text-indigo-200 font-bold mb-6">Паём дар ин ҷо пайдо мешавад.</p>
+      <button onclick="closeAlert()" class="bg-gradient-to-r from-kidPink to-kidYellow text-white font-black px-8 py-3 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md w-full">
+        Аъло! 👍
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer Info -->
+  <footer class="text-center text-xs text-indigo-400/60 py-4 relative z-10 font-medium select-none">
+    &copy; <span id="current-year"></span> Қаҳрамони ҳафта • Сад фоиз автономӣ ва бехатар • Барои хонандагони синфи 1 ❤️
+  </footer>
+
+  <!-- Core JavaScript -->
+  <script>
+    // State Schema & Defaults
+    let state = {
+      currentCycle: 1,
+      students: []
+    };
+
+    // Cute Kid-Friendly Emojis list
+    const CUTE_EMOJIS = [
+      '🦊', '🤖', '🚀', '🐼', '🦁', '🐯', '🐨', '🐰', '🐶', '🐱',
+      '🐻', '🐸', '🐵', '🦄', '🦖', '🐙', '🐝', '🦁', '🦉', '🦥',
+      '🎨', '⚽', '🚀', '🛸', '👾', '🦸', '🧙', '🌟', '🎈', '🐠'
+    ];
+
+    // Predefined Tajik Secret Missions
+    const SECRET_MISSIONS = [
+      { id: 'board_keeper', title: 'Назоратчии тахтаи синф 🧹', desc: 'Тахтаи синфро тоза нигоҳ доштан ва омода кардани бор ё маркер барои дарс.' },
+      { id: 'teachers_helper', title: 'Ёрдамчии асосии муаллим 📝', desc: 'Кӯмак ба муаллим дар паҳн кардани дафтарҳо ва маводи дарсӣ ба ҳамсинфон.' },
+      { id: 'flower_keeper', title: 'Нигоҳубинкунандаи гулҳо 💧', desc: 'Мунтазам об додан ва тоза нигоҳ доштани гулҳои синфхона дар давоми ҳафта.' },
+      { id: 'line_leader', title: 'Раҳнамои саф 🚶', desc: 'Кӯмак дар ташкил ва нигоҳдории тартиби сафи хонандагон ҳангоми рафтан ба ошхона ё берун.' },
+      { id: 'light_keeper', title: 'Нерубахши чароғҳо 💡', desc: 'Назорат барои хомӯш кардани чароғҳо ҳангоми баромадани синф ба танаффус.' },
+      { id: 'book_keeper', title: 'Муҳофизи китобҳо 📚', desc: 'Озода ва ба тартиб гузоштани китобҳо дар ҷевони китобхонаи хурди синф.' },
+      { id: 'cleanliness_captain', title: 'Сафири тозагӣ 🗑️', desc: 'Назорат аз болои тозагии атрофи мизҳои дарсӣ ва партофтани коғазҳо ба қуттӣ.' }
+    ];
+
+    // Sound Synthesizer via Web Audio API
+    let isMuted = false;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      localStorage.setItem('hero_week_mute', JSON.stringify(isMuted));
+      updateSoundButtonUI();
+      playClickSound();
+    }
+
+    function updateSoundButtonUI() {
+      const btn = document.getElementById('sound-btn');
+      if (isMuted) {
+        btn.innerHTML = '🔇';
+        btn.classList.remove('bg-white/10');
+        btn.classList.add('bg-rose-500/20', 'border-rose-500/30');
+      } else {
+        btn.innerHTML = '🔊';
+        btn.classList.add('bg-white/10');
+        btn.classList.remove('bg-rose-500/20', 'border-rose-500/30');
+      }
+    }
+
+    // Synthesizes a clean game touch/click sound
+    function playClickSound() {
+      if (isMuted) return;
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // Synthesizes a rapid tick sound (roulette item swap)
+    function playTickSound() {
+      if (isMuted) return;
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.05);
+
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    // Synthesizes a warning/skip buzzer sound
+    function playBuzzerSound() {
+      if (isMuted) return;
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(140, audioCtx.currentTime + 0.15);
+
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    // Synthesizes winner brass fanfare
+    function playFanfareSound() {
+      if (isMuted) return;
+      initAudio();
+
+      const now = audioCtx.currentTime;
+      const playTone = (freq, start, duration, type = 'triangle') => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.1, start);
+        gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+        osc.start(start);
+        osc.stop(start + duration);
+      };
+
+      // Play C-major arpeggio sequence C4, E4, G4, C5
+      playTone(261.63, now, 0.15); // C4
+      playTone(329.63, now + 0.15, 0.15); // E4
+      playTone(392.00, now + 0.30, 0.15); // G4
+      playTone(523.25, now + 0.45, 0.6, 'sine'); // C5
+      playTone(659.25, now + 0.60, 1.0, 'sine'); // E5 (triumphant)
+    }
+
+    // LocalStorage Operations
+    function loadState() {
+      const stored = localStorage.getItem('hero_week_state');
+      if (stored) {
+        try {
+          state = JSON.parse(stored);
+        } catch (e) {
+          console.error("State parse error, fallback to default", e);
+          initDefaultState();
+        }
+      } else {
+        initDefaultState();
+      }
+
+      // Load sound state
+      const soundStored = localStorage.getItem('hero_week_mute');
+      if (soundStored !== null) {
+        isMuted = JSON.parse(soundStored);
+      }
+      updateSoundButtonUI();
+    }
+
+    function saveState() {
+      localStorage.setItem('hero_week_state', JSON.stringify(state));
+      render();
+    }
+
+    function initDefaultState() {
+      state = {
+        currentCycle: 1,
+        students: [
+          { id: '1', name: 'Амирхон Неъматов', avatar: '🦁', hasBeenMonitor: false, absentCount: 0 },
+          { id: '2', name: 'Мадина Саидова', avatar: '🦊', hasBeenMonitor: false, absentCount: 0 },
+          { id: '3', name: 'Сомон Иброҳимов', avatar: '🚀', hasBeenMonitor: false, absentCount: 0 },
+          { id: '4', name: 'Ойиша Каримова', avatar: '🐼', hasBeenMonitor: false, absentCount: 0 },
+          { id: '5', name: 'Фирдавс Ҳалимов', avatar: '🤖', hasBeenMonitor: false, absentCount: 0 },
+          { id: '6', name: 'Ситора Раҳмонова', avatar: '⭐', hasBeenMonitor: false, absentCount: 0 },
+          { id: '7', name: 'Ҷамшед Ёров', avatar: '🐯', hasBeenMonitor: false, absentCount: 0 },
+          { id: '8', name: 'Зӯҳро Маҳмудова', avatar: '🦄', hasBeenMonitor: false, absentCount: 0 }
+        ]
+      };
+      localStorage.setItem('hero_week_state', JSON.stringify(state));
+    }
+
+    // UI View Switches
+    function showView(viewId) {
+      const views = ['view-main', 'view-roulette', 'view-reveal'];
+      views.forEach(id => {
+        const el = document.getElementById(id);
+        if (id === viewId) {
+          el.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10', 'scale-95', 'absolute');
+          el.classList.add('opacity-100', 'scale-100', 'transform');
+        } else {
+          el.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10', 'scale-95', 'absolute');
+          el.classList.remove('opacity-100', 'scale-100');
+        }
+      });
+    }
+
+    // Randomizer Picker
+    let currentEmojiIndex = 0;
+    function randomizePreviewEmoji() {
+      playClickSound();
+      currentEmojiIndex = Math.floor(Math.random() * CUTE_EMOJIS.length);
+      document.getElementById('selected-emoji-preview').innerText = CUTE_EMOJIS[currentEmojiIndex];
+    }
+
+    // Generator UUID Helper
+    function generateUUID() {
+      return 'user-' + Math.random().toString(36).substring(2, 11) + '-' + Date.now().toString(36);
+    }
+
+    // Custom Alert Modals
+    function triggerAlert(title, message, icon = '🔔') {
+      document.getElementById('alert-title').innerText = title;
+      document.getElementById('alert-message').innerText = message;
+      document.getElementById('alert-icon').innerText = icon;
+
+      const modal = document.getElementById('custom-alert');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+      modal.querySelector('div').classList.add('scale-100');
+    }
+
+    function closeAlert() {
+      playClickSound();
+      const modal = document.getElementById('custom-alert');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-100');
+      modal.querySelector('div').classList.add('scale-95');
+    }
+
+    // Kid-safe math lock entry validation
+    let mathAnswerValue = 0;
+    function openLockModal() {
+      playClickSound();
+      const num1 = Math.floor(Math.random() * 8) + 2; // 2 to 9
+      const num2 = Math.floor(Math.random() * 8) + 2; // 2 to 9
+      mathAnswerValue = num1 + num2;
+
+      document.getElementById('math-num1').innerText = num1;
+      document.getElementById('math-num2').innerText = num2;
+      document.getElementById('math-answer').value = '';
+
+      const modal = document.getElementById('lock-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('lock-modal-card').classList.remove('scale-95');
+      document.getElementById('lock-modal-card').classList.add('scale-100');
+
+      setTimeout(() => {
+        document.getElementById('math-answer').focus();
+      }, 300);
+    }
+
+    function closeLockModal() {
+      playClickSound();
+      const modal = document.getElementById('lock-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('lock-modal-card').classList.remove('scale-100');
+      document.getElementById('lock-modal-card').classList.add('scale-95');
+    }
+
+    function submitLockAnswer() {
+      const input = parseInt(document.getElementById('math-answer').value, 10);
+      if (input === mathAnswerValue) {
+        closeLockModal();
+        openTeacherPanel();
+      } else {
+        playBuzzerSound();
+        triggerAlert("Хато!", "Ҷавоб нодуруст аст. Муаллими азиз, лутфан дубора кӯшиш кунед!", "❌");
+      }
+    }
+
+    // Teacher Panel Toggle
+    function openTeacherPanel() {
+      playClickSound();
+      const modal = document.getElementById('panel-teacher');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('panel-card').classList.remove('scale-95');
+      document.getElementById('panel-card').classList.add('scale-100');
+      renderTeacherPanel();
+    }
+
+    function closeTeacherPanel() {
+      playClickSound();
+      const modal = document.getElementById('panel-teacher');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('panel-card').classList.remove('scale-100');
+      document.getElementById('panel-card').classList.add('scale-95');
+    }
+
+    // Add Student Logic
+    function addStudent() {
+      const nameInput = document.getElementById('new-student-name');
+      const name = nameInput.value.trim();
+      if (!name) {
+        triggerAlert("Огоҳӣ!", "Лутфан ному насаби хонандаро ворид кунед!", "⚠️");
+        return;
+      }
+
+      const avatar = document.getElementById('selected-emoji-preview').innerText;
+      const newStudent = {
+        id: generateUUID(),
+        name: name,
+        avatar: avatar,
+        hasBeenMonitor: false,
+        absentCount: 0
+      };
+
+      state.students.push(newStudent);
+      nameInput.value = '';
+      randomizePreviewEmoji();
+      saveState();
+      playClickSound();
+      renderTeacherPanel();
+    }
+
+    // Delete Student Logic
+    function deleteStudent(id) {
+      if (confirm("Оё шумо дар ҳақиқат мехоҳед ин хонандаро нест кунед?")) {
+        state.students = state.students.filter(s => s.id !== id);
+        saveState();
+        playClickSound();
+        renderTeacherPanel();
+      }
+    }
+
+    // Reset All Cycle Settings manually
+    function confirmResetCycle() {
+      if (confirm("Оё мехоҳед даври кунуниро аз нав оғоз намоед? Ҳамаи хонандагон ба рӯйхати интихоб баргардонида мешаванд.")) {
+        state.students.forEach(s => s.hasBeenMonitor = false);
+        saveState();
+        playClickSound();
+        renderTeacherPanel();
+        triggerAlert("Давр аз нав шуд!", "Ҳамаи хонандагон аз нав барои интихоб омодаанд. Навбат оғоз гардид!", "🔄");
+      }
+    }
+
+    function confirmResetAll() {
+      if (confirm("ДИҚҚАТ! Бо ин амал тамоми хонандагон ва таърихи бозиҳо пурра нест карда мешавад. Оё боварӣ доред?")) {
+        localStorage.removeItem('hero_week_state');
+        initDefaultState();
+        saveState();
+        playClickSound();
+        renderTeacherPanel();
+        triggerAlert("Маълумот тоза шуд!", "Система ба ҳолати аввала баргардонида шуд.", "🗑️");
+      }
+    }
+
+    // Selection/Roulette Logic
+    let spinInterval = null;
+    let pool = [];
+    let rouletteIndex = 0;
+    let selectedStudent = null;
+
+    function startSelection() {
+      initAudio();
+      playClickSound();
+
+      // Filter out students who already been monitor
+      pool = state.students.filter(s => !s.hasBeenMonitor);
+
+      if (state.students.length === 0) {
+        triggerAlert("Саф холӣ аст!", "Лутфан ба панели муаллим ворид шуда, хонандагонро илова кунед! 📝", "⚠️");
+        return;
+      }
+
+      if (pool.length === 0) {
+        // This is safe fallback. Usually we reset cycle right after last acceptance,
+        // but just in case, let's catch here too.
+        triggerAndResetNewCycle();
+        return;
+      }
+
+      // Switch to selection view
+      showView('view-roulette');
+
+      // Start the roulette animation
+      let speed = 60; // Initial interval speed
+      let duration = 3000; // Total spin duration
+      let elapsedTime = 0;
+
+      const runSpinner = () => {
+        rouletteIndex = Math.floor(Math.random() * pool.length);
+        const item = pool[rouletteIndex];
+
+        document.getElementById('roulette-avatar').innerText = item.avatar;
+        document.getElementById('roulette-name').innerText = item.name;
+
+        playTickSound();
+
+        elapsedTime += speed;
+        if (elapsedTime < duration) {
+          // Slowly decrease spinner speed as it approaches end to build suspense
+          if (elapsedTime > duration * 0.7) {
+            speed += 40;
+          } else if (elapsedTime > duration * 0.4) {
+            speed += 15;
+          }
+          spinInterval = setTimeout(runSpinner, speed);
+        } else {
+          // Selection complete
+          selectedStudent = pool[rouletteIndex];
+          revealWinner();
+        }
+      };
+
+      runSpinner();
+    }
+
+    // Trigger Reveal view
+    function revealWinner() {
+      // Setup reveal panel with selected student data
+      document.getElementById('winner-avatar').innerText = selectedStudent.avatar;
+      document.getElementById('winner-name').innerText = selectedStudent.name;
+
+      // Select 2-3 unique random secret missions
+      const shuffledMissions = [...SECRET_MISSIONS].sort(() => 0.5 - Math.random());
+      const missionsCount = Math.floor(Math.random() * 2) + 2; // Returns 2 or 3
+      const chosenMissions = shuffledMissions.slice(0, missionsCount);
+
+      const missionsList = document.getElementById('winner-missions');
+      missionsList.innerHTML = '';
+      chosenMissions.forEach(m => {
+        const li = document.createElement('li');
+        li.className = 'bg-slate-900 p-3 rounded-lg border-l-4 border-kidPink text-sm text-slate-200';
+        li.innerHTML = `
+          <strong class="text-kidYellow block mb-1 text-base">${m.title}</strong>
+          <span>${m.desc}</span>
+        `;
+        missionsList.appendChild(li);
+      });
+
+      // Switch to reveal view
+      showView('view-reveal');
+
+      // Play triumphant fanfare sound
+      playFanfareSound();
+
+      // Fire glorious confetti bursts!
+      const duration = 2.5 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#4cc9f0', '#f72585', '#ffbe0b', '#06d6a0']
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#4cc9f0', '#f72585', '#ffbe0b', '#06d6a0']
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+
+    // Handle Teacher Action: "Бемор / Гузаронидан" (Absent / Skip)
+    function handleAbsent() {
+      playBuzzerSound();
+
+      // Find student in original state and increment absent counter
+      const original = state.students.find(s => s.id === selectedStudent.id);
+      if (original) {
+        original.absentCount = (original.absentCount || 0) + 1;
+      }
+
+      saveState();
+
+      // Instantly spin again to pick someone else
+      startSelection();
+    }
+
+    // Handle Teacher Action: "Қабул" (Accept)
+    function handleAccept() {
+      playClickSound();
+
+      // Find student in state and mark as monitor
+      const original = state.students.find(s => s.id === selectedStudent.id);
+      if (original) {
+        original.hasBeenMonitor = true;
+      }
+
+      // Check if all students have been monitor
+      const waitingLeft = state.students.filter(s => !s.hasBeenMonitor).length;
+
+      if (waitingLeft === 0) {
+        // Grand cycle completion!
+        saveState();
+        triggerAndResetNewCycle();
+      } else {
+        saveState();
+        // Go back to main screen
+        showView('view-main');
+        triggerAlert("Табрик! 🎉", `${selectedStudent.name} қаҳрамони ин ҳафта интихоб шуд! Вазифаҳои худро бомуваффақият иҷро намо!`, "🌟");
+      }
+    }
+
+    // Grand Cycle Complete Trigger
+    function triggerAndResetNewCycle() {
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+
+      // Show grand modal
+      triggerAlert(
+        "Ҳама қаҳрамон шуданд! 👑",
+        `Табрик мекунем! Ҳамаи хонандагони синфи мо дар даври ${state.currentCycle} навбатдор шуданд. Давраи нав оғоз мешавад!`,
+        "🏆"
+      );
+
+      // Increment cycle counter and reset monitor states
+      state.currentCycle += 1;
+      state.students.forEach(s => s.hasBeenMonitor = false);
+      saveState();
+
+      // Redirect back to main screen
+      showView('view-main');
+    }
+
+    // Main Render UI Sync
+    function render() {
+      // Update Cycle text
+      document.getElementById('cycle-badge').innerText = state.currentCycle;
+
+      // Filter and count waiting
+      const waitingList = state.students.filter(s => !s.hasBeenMonitor);
+      document.getElementById('waiting-count').innerText = waitingList.length;
+
+      // Render Hall of Fame
+      const monitoredList = state.students.filter(s => s.hasBeenMonitor);
+      const hallGrid = document.getElementById('hall-grid');
+      const hallEmpty = document.getElementById('hall-empty');
+
+      if (monitoredList.length > 0) {
+        hallGrid.innerHTML = '';
+        hallGrid.classList.remove('hidden');
+        hallEmpty.classList.add('hidden');
+
+        monitoredList.forEach(s => {
+          const card = document.createElement('div');
+          card.className = 'bg-slate-900/90 border border-amber-500/40 rounded-2xl p-4 flex flex-col items-center text-center shadow-md relative group hover:border-amber-400 transition-all duration-300';
+          card.innerHTML = `
+            <div class="absolute -top-3 -right-3 text-lg bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-full p-1 border border-white shadow">👑</div>
+            <span class="text-4xl md:text-5xl mb-2 filter drop-shadow animate-pulse-slow">${s.avatar}</span>
+            <span class="text-xs text-amber-400 font-extrabold tracking-wider uppercase mb-1">Қаҳрамон</span>
+            <span class="font-bold text-sm text-white truncate max-w-full">${s.name}</span>
+          `;
+          hallGrid.appendChild(card);
+        });
+      } else {
+        hallGrid.classList.add('hidden');
+        hallEmpty.classList.remove('hidden');
+      }
+    }
+
+    // Render Student lists and tables in Teacher Panel
+    function renderTeacherPanel() {
+      // Statistics Sync
+      const totalCount = state.students.length;
+      const monitoredCount = state.students.filter(s => s.hasBeenMonitor).length;
+      const waitingCount = totalCount - monitoredCount;
+
+      document.getElementById('stat-total').innerText = totalCount;
+      document.getElementById('stat-monitored').innerText = monitoredCount;
+      document.getElementById('stat-waiting').innerText = waitingCount;
+      document.getElementById('stat-cycle').innerText = state.currentCycle;
+      document.getElementById('list-count').innerText = `Умумӣ: ${totalCount} нафар`;
+
+      // Render Table rows
+      const tbody = document.getElementById('student-table-body');
+      const emptyDiv = document.getElementById('table-empty');
+      tbody.innerHTML = '';
+
+      if (totalCount > 0) {
+        emptyDiv.classList.add('hidden');
+        state.students.forEach(s => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-white/5 transition-all duration-150';
+
+          const statusText = s.hasBeenMonitor
+            ? `<span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-black border border-emerald-500/30">Қаҳрамон шуд</span>`
+            : `<span class="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-black border border-amber-500/30">Дар навбат</span>`;
+
+          row.innerHTML = `
+            <td class="p-4 text-center text-3xl select-none">${s.avatar}</td>
+            <td class="p-4 text-base font-extrabold text-white">${s.name}</td>
+            <td class="p-4">${statusText}</td>
+            <td class="p-4 text-center text-amber-500 font-bold">${s.absentCount || 0} маротиба</td>
+            <td class="p-4 text-center">
+              <button onclick="deleteStudent('${s.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800/40 p-2 rounded-xl transition-all hover:scale-105 active:scale-95" title="Нест кардан">
+                🗑️
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        emptyDiv.classList.remove('hidden');
+      }
+    }
+
+    // Generate Floating Background Bubbles dynamically
+    function generateBackgroundBubbles() {
+      const container = document.getElementById('bubble-container');
+      container.innerHTML = '';
+      const count = 15;
+
+      for (let i = 0; i < count; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+
+        // Random size
+        const size = Math.floor(Math.random() * 60) + 20; // 20px to 80px
+        bubble.style.width = size + 'px';
+        bubble.style.height = size + 'px';
+
+        // Random horizontal start position
+        bubble.style.left = Math.floor(Math.random() * 100) + 'vw';
+
+        // Random speed
+        const duration = Math.floor(Math.random() * 10) + 12; // 12s to 22s
+        bubble.style.animationDuration = duration + 's';
+
+        // Random delay
+        const delay = Math.floor(Math.random() * 8); // 0s to 8s
+        bubble.style.animationDelay = delay + 's';
+
+        container.appendChild(bubble);
+      }
+    }
+
+    // Keyboard lock-modal escape/submit helper
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLockModal();
+        closeTeacherPanel();
+        closeAlert();
+      }
+    });
+
+    document.getElementById('math-answer').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitLockAnswer();
+      }
+    });
+
+    // Initialize application on load
+    window.onload = () => {
+      document.getElementById('current-year').innerText = new Date().getFullYear();
+      loadState();
+      generateBackgroundBubbles();
+      randomizePreviewEmoji();
+      render();
+    };
+  </script>
+</body>
+</html>
