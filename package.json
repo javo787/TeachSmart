@@ -1,6 +1,13 @@
 {
+  "name": "hero-of-the-week",
+  "private": true,
+  "description": "Гамификатсияшудаи \"Қаҳрамони ҳафта\" — интихоби навбатдори синф барои хонандагони синфи 1. 100% офлайн, як файли index.html.",
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
   "devDependencies": {
-    "canvas-confetti": "^1.9.4",
-    "tailwindcss": "^4.3.3"
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "canvas-confetti": "^1.9.4"
   }
 }
